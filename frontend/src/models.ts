@@ -7,7 +7,10 @@ export interface Product {
 }
 
 export interface User {
-  id: number
-  email: string
-  password: string
+  id: number;
+  login: string;
+  password: string;
+  roles: ('admin' | 'user')[];
+  gender: 'male' | 'female';
+  age: number;
 }

@@ -9,12 +9,12 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <q-form ref="form" @submit="onSubmit" @reset="onReset" class="q-gutter-md">
+          <q-form ref="form" class="q-gutter-md">
             <q-input
               filled
-              v-model="email"
-              label="Your name *"
-              hint="Name and surname"
+              v-model="login"
+              label="Your Login *"
+              hint="Login with Email"
               lazy-rules
               :rules="[(val) => (val && val.length > 0) || 'Please type something']"
             />
@@ -27,10 +27,24 @@
               lazy-rules
               :rules="[(val) => (val !== null && val !== '') || 'Please type your password']"
             />
+            <q-input
+              filled
+              v-model.number="age"
+              label="Your Age *"
+              hint="Age"
+              lazy-rules
+              type="number"
+              :rules="[(val) => val >= 10 || 'Please type age']"
+            />
 
-            <div>
-              <q-btn label="Submit" type="submit" color="primary" />
-              <q-btn label="Cancel" type="reset" color="primary" flat class="q-ml-sm" />
+            <div class="q-gutter-sm">
+              <q-checkbox v-model="roles" label="Admin" color="teal" val="admin" />
+              <q-checkbox v-model="roles" label="User" color="orange" val="user" />
+            </div>
+
+            <div class="q-gutter-sm">
+              <q-radio v-model="gender" val="male" label="Male" />
+              <q-radio v-model="gender" val="female" label="Female" />
             </div>
           </q-form>
         </q-card-section>
@@ -68,9 +82,9 @@ const columns: QTableColumn[] = [
     sortable: true,
   },
   {
-    name: 'email',
-    label: 'Email',
-    field: 'email',
+    name: 'login',
+    label: 'Login',
+    field: 'login',
     align: 'center',
   },
   {
@@ -89,32 +103,63 @@ const columns: QTableColumn[] = [
 
 const userStore = useUserStore()
 const id = ref(0)
-const email = ref('')
+const login = ref('')
 const password = ref('')
+const roles = ref<('admin' | 'user')[]>(['user'])
+const gender = ref<'male' | 'female'>('male')
+const age = ref<number>(10)
 
 function edit(row: User) {
   id.value = row.id
-  email.value = row.email
+  login.value = row.login
   password.value = row.password
   dialog.value = true
 }
 
-function onSubmit() {
-  if (id.value === 0) {
-    userStore.addUser({ id: id.value, email: email.value, password: password.value })
-  } else {
-    userStore.updateUser({ id: id.value, email: email.value, password: password.value })
-  }
-  dialog.value = false
-  onReset()
-}
+// function onSubmit() {
+//   if (id.value === 0) {
+//     userStore.addUser({
+//       id: id.value,
+//       login: login.value,
+//       password: password.value,
+//       roles: roles.value,
+//       gender: gender.value,
+//       age: age.value,
+//     })
+//   } else {
+//     userStore.updateUser({
+//       id: id.value,
+//       login: login.value,
+//       password: password.value,
+//       roles: roles.value,
+//       gender: gender.value,
+//       age: age.value,
+//     })
+//   }
+//   dialog.value = false
+//   onReset()
+// }
 function save() {
   form.value?.validate().then((success) => {
     if (success) {
       if (id.value === 0) {
-        userStore.addUser({ id: id.value, email: email.value, password: password.value })
+        userStore.addUser({
+          id: id.value,
+          login: login.value,
+          password: password.value,
+          roles: roles.value,
+          gender: gender.value,
+          age: age.value,
+        })
       } else {
-        userStore.updateUser({ id: id.value, email: email.value, password: password.value })
+        userStore.updateUser({
+          id: id.value,
+          login: login.value,
+          password: password.value,
+          roles: roles.value,
+          gender: gender.value,
+          age: age.value,
+        })
       }
       dialog.value = false
       onReset()
@@ -124,7 +169,7 @@ function save() {
 function reset() {
   form.value?.resetValidation()
   id.value = 0
-  email.value = ''
+  login.value = ''
   password.value = ''
   dialog.value = false
 }
@@ -133,7 +178,7 @@ function remove(row: User) {
 }
 function onReset() {
   id.value = 0
-  email.value = ''
+  login.value = ''
   password.value = ''
   dialog.value = false
 }
