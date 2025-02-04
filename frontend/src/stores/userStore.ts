@@ -1,5 +1,5 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
-import { Loading } from 'quasar'
+import { Loading, Notify } from 'quasar'
 import { api } from 'src/boot/axios'
 import { type User } from 'src/models'
 import { ref } from 'vue'
@@ -7,21 +7,62 @@ import { ref } from 'vue'
 export const useUserStore = defineStore('user', () => {
   const users = ref<User[]>([])
 
-  let lastUserId = 3
-  function addUser(u: User) {
-    users.value.push({ ...u, id: lastUserId++ })
+  async function addUser(u: User) {
+    try {
+      Loading.show()
+      const res = await api.post('/Users', u)
+      console.log(res.data)
+      await getUsers()
+    } catch (err) {
+      console.log(err)
+      Notify.create({
+        color: 'negative',
+        position: 'top',
+        message: 'Add failed',
+        icon: 'report_problem',
+      })
+    } finally {
+      console.log('finally')
+      Loading.hide()
+    }
   }
-  function delUser(u: User) {
-    const index = users.value.findIndex((item) => {
-      return u.id === item.id
-    })
-    users.value.splice(index, 1)
+  async function delUser(u: User) {
+    try {
+      Loading.show()
+      const res = await api.delete('/users/' + u.id)
+      console.log(res.data)
+      await getUsers()
+    } catch (err) {
+      console.log(err)
+      Notify.create({
+        color: 'negative',
+        position: 'top',
+        message: 'Delete failed',
+        icon: 'report_problem',
+      })
+    } finally {
+      console.log('finally')
+      Loading.hide()
+    }
   }
-  function updateUser(u: User) {
-    const index = users.value.findIndex((item) => {
-      return u.id === item.id
-    })
-    users.value[index] = { ...u }
+  async function updateUser(u: User) {
+    try {
+      Loading.show()
+      const res = await api.patch('/users/' + u.id, u)
+      console.log(res.data)
+      await getUsers()
+    } catch (err) {
+      console.log(err)
+      Notify.create({
+        color: 'negative',
+        position: 'top',
+        message: 'Update failed',
+        icon: 'report_problem',
+      })
+    } finally {
+      console.log('finally')
+      Loading.hide()
+    }
   }
   function getUserByEmail(login: string): User | undefined {
     return users.value.find((item) => item.login === login)
@@ -35,9 +76,16 @@ export const useUserStore = defineStore('user', () => {
       users.value = res.data
     } catch (err) {
       console.log(err)
+      Notify.create({
+        color: 'negative',
+        position: 'top',
+        message: 'Loading failed',
+        icon: 'report_problem',
+      })
     } finally {
       console.log('finally')
       Loading.hide()
+
     }
   }
   getUsers()
